@@ -28,8 +28,8 @@ Application starts a tomcat server on localhost:8080
 | GET | /accounts/ | Get all accounts | 
 | POST | /accounts/ | Create a new account
 | DELETE | /accounts/{accountId} | Remove account by accountId | 
-| PUT | /deposits/{amount} | Deposit money to account | 
-| PUT | /withdraws/{amount} | Withdraw money from account | 
+| POST | /deposits/ | Deposit money to account | 
+| POST | /withdraws/ | Withdraw money from account | 
 | POST | /transfers/ | Transfer between 2 accounts | 
 
 ### Http Status
@@ -39,7 +39,7 @@ Application starts a tomcat server on localhost:8080
 - 500 Internal Server Error: Unexpected server error
 
 ### Sample JSON 
-##### Account : 
+#### Account : 
 ```json
 {  
   "id": 1,
@@ -47,7 +47,7 @@ Application starts a tomcat server on localhost:8080
   "currencyCode": "RUB"
 } 
 ```
-##### Deposit/Withdraw: : 
+#### Deposit/Withdraw: : 
 
 ```json
 {  
