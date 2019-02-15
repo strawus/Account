@@ -3,8 +3,8 @@ package com.zolotarev.account.domain;
 import com.zolotarev.util.Contract;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -15,9 +15,8 @@ import static java.math.BigDecimal.TEN;
  * Value object represents monetary currency and operations above it
  */
 @Getter
-@ToString
 @RequiredArgsConstructor
-public enum Currency {
+public enum Currency implements Serializable {
     RUB(2),
     USD(2),
     EUR(2);

@@ -25,10 +25,10 @@ public class DebugLoggerAspect {
         Logger log = LoggerFactory.getLogger(joinPoint.getTarget().getClass());
         try {
             final Object result = joinPoint.proceed();
-            log.debug("Success {}({}) -> {}", joinPoint.getSignature().getName(), joinPoint.getArgs(), result);
+            log.debug("{}({}) returned {}", joinPoint.getSignature().getName(), joinPoint.getArgs(), result);
             return result;
         } catch (Throwable e) {
-            log.debug("Exception {}({}) -> {}(message={})", joinPoint.getSignature().getName(), joinPoint.getArgs(), e.getClass().getSimpleName(), e.getMessage());
+            log.debug("{}({}) threw {}(message={})", joinPoint.getSignature().getName(), joinPoint.getArgs(), e.getClass().getSimpleName(), e.getMessage());
             throw e;
         }
     }

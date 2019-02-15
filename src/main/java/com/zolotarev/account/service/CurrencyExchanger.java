@@ -37,9 +37,9 @@ public class CurrencyExchanger {
      */
     public BigDecimal exchange(BigDecimal amount, Currency current, Currency target) {
         Contract.requiresNotNull(amount, AMOUNT_MUST_BE_NOT_NULL);
-        Contract.requiresMore(amount, ZERO, AMOUNT_MUST_BE_POSITIVE);
         Contract.requiresNotNull(current, SOURCE_CURRENCY_MUST_BE_NOT_NULL);
         Contract.requiresNotNull(target, TARGET_CURRENCY_MUST_BE_NOT_NULL);
+        Contract.requiresMore(amount, ZERO, AMOUNT_MUST_BE_POSITIVE);
 
         if (current == target) return amount;
 
