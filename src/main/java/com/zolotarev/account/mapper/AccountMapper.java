@@ -18,12 +18,13 @@ public interface AccountMapper {
 
     default Account toEntity(AccountDto accountDto) {
         final Currency currency = Currency.parse(accountDto.getCurrencyCode());
-        return new Account(accountDto.getId(), accountDto.getAmount(), currency);
+        return new Account(accountDto.getId(), accountDto.getAmount(), currency, accountDto.getVersion());
     }
 
     @Mapping(target = "withId", ignore = true)
     @Mapping(target = "withAmount", ignore = true)
     @Mapping(target = "withCurrencyCode", ignore = true)
+    @Mapping(target = "withVersion", ignore = true)
     @Mapping(target = "currencyCode", source = "currency")
     AccountDto toDto(Account account);
 
