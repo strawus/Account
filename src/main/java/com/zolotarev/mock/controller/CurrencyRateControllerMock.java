@@ -17,8 +17,8 @@ import static com.zolotarev.constant.Messages.UNKNOWN_CURRENCY_PAIR;
 /**
  * Uses instead mock server for simulating currency rates api
  */
-@Profile("dev")
 @RestController
+@Profile("mockCurrencyRate")
 @RequestMapping("/api/currency-rates")
 public class CurrencyRateControllerMock {
 

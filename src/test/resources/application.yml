@@ -1,3 +1,31 @@
 spring:
-  profiles:
-    active: dev
+  profiles.active: dev
+  main.banner-mode: 'off'
+  liquibase.change-log: classpath:migration/changelog.xml
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/postgres
+    hikari:
+      auto-commit: false
+      connection-test-query: SELECT 1
+
+  jpa:
+    properties:
+      hibernate:
+        order_inserts: true
+        order_updates: true
+        temp.use_jdbc_metadata_defaults: false
+        dialect: org.hibernate.dialect.PostgreSQL95Dialect
+
+        jdbc:
+          batch_size: 6
+          fetch_size: 5
+          batch_versioned_data: true
+
+    hibernate:
+      ddl-auto: none
+      use-new-id-generator-mappings: true
+    open-in-view: false

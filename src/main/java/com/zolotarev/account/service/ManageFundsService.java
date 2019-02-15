@@ -91,6 +91,7 @@ public class ManageFundsService {
         Contract.requiresNotNull(fromAccountId, SOURCE_ACCOUNT_ID_MUST_BE_NOT_NULL);
         Contract.requiresNotNull(toAccountId, TARGET_ACCOUNT_ID_MUST_BE_NOT_NULL);
         Contract.requiresNotNull(amount, AMOUNT_MUST_BE_NOT_NULL);
+        Contract.requiresNotNull(currency, CURRENCY_MUST_BE_NOT_NULL);
         Contract.requiresNotEquals(fromAccountId, toAccountId, UNABLE_TO_TRANSFER_TO_THE_SAME_ACCOUNT);
         Contract.requiresMore(amount, ZERO, AMOUNT_MUST_BE_POSITIVE);
 

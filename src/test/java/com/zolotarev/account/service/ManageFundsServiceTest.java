@@ -1,9 +1,7 @@
 package com.zolotarev.account.service;
 
-import com.zolotarev.account.client.CurrencyRateClient;
 import com.zolotarev.account.domain.Account;
 import com.zolotarev.account.domain.Currency;
-import com.zolotarev.helper.TestDataHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -13,46 +11,43 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 
 import static com.zolotarev.account.domain.Currency.*;
-import static java.math.BigDecimal.ONE;
-import static java.math.BigDecimal.TEN;
+import static java.math.BigDecimal.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
- * Test suite for {@link ManageFundsService}
+ * Test class for {@link ManageFundsService}
  */
-@SpringBootTest
 @TestExecutionListeners(MockitoTestExecutionListener.class)
+@SpringBootTest(classes = ManageFundsService.class)
 public class ManageFundsServiceTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private AccountService accountService;
-    @Autowired
     private ManageFundsService manageFundsService;
-    @Autowired
-    private TestDataHelper testDataHelper;
     @MockBean
-    private CurrencyRateClient rateClient;
+    private AccountService accountService;
+    @MockBean
+    private CurrencyExchanger currencyExchanger;
 
     @BeforeClass
     public void setUp() {
-        testDataHelper.prepareDatabaseData();
-        when(rateClient.getRate(any(), any())).thenReturn(Mono.just(ONE));
+        when(currencyExchanger.exchange(any(), any(), any())).then(invocation -> invocation.getArgument(0));
     }
 
+    /**
+     * @return Data for testing deposit in format:
+     * Account amount before deposit, amount to deposit, expected amount after deposit
+     */
     @DataProvider
     public static Object[][] depositAccountData() {
         return new Object[][]{
-                {1, ONE, RUB},
-                {2, TEN, USD},
-                {3, BigDecimal.valueOf(10000L), EUR},
+                {TEN, ONE, TEN.add(ONE)},
+                {ZERO, BigDecimal.valueOf(10000L), BigDecimal.valueOf(10000L)}
         };
     }
 
@@ -60,23 +55,25 @@ public class ManageFundsServiceTest extends AbstractTestNGSpringContextTests {
      * Checking that amount increase after deposit
      */
     @Test(dataProvider = "depositAccountData")
-    public void depositAccountTest(Integer accountId, BigDecimal amount, Currency currency) {
-        final Account accountBeforeDebit = accountService.getById(accountId);
-        final BigDecimal expectedAmount = accountBeforeDebit.getAmount().add(amount);
+    public void depositAccountTest(BigDecimal accountAmount, BigDecimal amountToDeposit, BigDecimal expectedAmount) {
+        final Account testAccount = new Account(1, accountAmount, RUB);
+        when(accountService.getById(testAccount.getId())).thenReturn(testAccount);
+        when(accountService.update(any())).then(invocation -> invocation.getArgument(0));
 
-        manageFundsService.deposit(accountId, amount, currency);
+        final Account accountAfterDeposit = manageFundsService.deposit(testAccount.getId(), amountToDeposit, testAccount.getCurrency());
 
-        final Account accountAfterDebit = accountService.getById(accountId);
-
-        assertTrue(accountAfterDebit.getAmount().compareTo(expectedAmount) == 0);
+        assertTrue(accountAfterDeposit.getAmount().compareTo(expectedAmount) == 0);
     }
 
+    /**
+     * @return Data for testing withdraw in format:
+     * Account amount before withdraw, amount to withdraw, expected amount after withdraw
+     */
     @DataProvider
     public static Object[][] withdrawAccountData() {
         return new Object[][]{
-                {4, ONE, RUB},
-                {5, TEN, EUR},
-                {6, BigDecimal.valueOf(250L), USD},
+                {TEN, ONE, TEN.subtract(ONE)},
+                {BigDecimal.valueOf(10000L), BigDecimal.valueOf(10000L), ZERO}
         };
     }
 
@@ -84,23 +81,25 @@ public class ManageFundsServiceTest extends AbstractTestNGSpringContextTests {
      * Checking that amount decrease after withdraw
      */
     @Test(dataProvider = "withdrawAccountData")
-    public void withdrawAccountTest(Integer accountId, BigDecimal amount, Currency currency) {
-        final Account accountBeforeCredit = accountService.getById(accountId);
-        final BigDecimal expectedAmount = accountBeforeCredit.getAmount().subtract(amount);
+    public void withdrawAccountTest(BigDecimal accountAmount, BigDecimal amountToWithdraw, BigDecimal expectedAmount) {
+        final Account testAccount = new Account(2, accountAmount, USD);
+        when(accountService.getById(testAccount.getId())).thenReturn(testAccount);
+        when(accountService.update(any())).then(invocation -> invocation.getArgument(0));
 
-        manageFundsService.withdraw(accountId, amount, currency);
+        final Account accountAfterWithdraw = manageFundsService.withdraw(testAccount.getId(), amountToWithdraw, testAccount.getCurrency());
 
-        final Account accountAfterCredit = accountService.getById(accountId);
-
-        assertTrue(accountAfterCredit.getAmount().compareTo(expectedAmount) == 0);
+        assertTrue(accountAfterWithdraw.getAmount().compareTo(expectedAmount) == 0);
     }
 
+    /**
+     * @return Data for testing transfer in format:
+     * Source account amount before transfer, target account amount before transfer, amount to transfer, expected source account amount, expected target account amount
+     */
     @DataProvider
     public static Object[][] transferData() {
         return new Object[][]{
-                {1, 2, BigDecimal.valueOf(100L), RUB},
-                {2, 1, BigDecimal.valueOf(200L), EUR},
-                {3, 4, BigDecimal.valueOf(350L), USD}
+                {TEN, ONE, ONE, TEN.subtract(ONE), ONE.add(ONE)},
+                {BigDecimal.valueOf(200L), ZERO, BigDecimal.valueOf(200L), ZERO, BigDecimal.valueOf(200L)}
         };
     }
 
@@ -108,28 +107,29 @@ public class ManageFundsServiceTest extends AbstractTestNGSpringContextTests {
      * Checking that amount changed after transfer
      */
     @Test(dataProvider = "transferData")
-    public void transferTest(Integer fromAccountId, Integer toAccountId, BigDecimal amount, Currency currency) {
-        final Account fromAccountBeforeTransfer = accountService.getById(fromAccountId);
-        final Account toAccountBeforeTransfer = accountService.getById(toAccountId);
-        final BigDecimal expectedFromAmount = fromAccountBeforeTransfer.getAmount().subtract(amount);
-        final BigDecimal expectedToAmount = toAccountBeforeTransfer.getAmount().add(amount);
+    public void transferTest(BigDecimal sourceAccountAmount, BigDecimal targetAccountAmount, BigDecimal amountToTransfer,
+                             BigDecimal expectedSourceAccountAmount, BigDecimal expectedTargetAccountAmount) {
+        final Currency currency = EUR;
+        final Account testSourceAccount = new Account(3, sourceAccountAmount, currency);
+        final Account testTargetAccount = new Account(4, targetAccountAmount, currency);
+        when(accountService.getById(testSourceAccount.getId())).thenReturn(testSourceAccount);
+        when(accountService.getById(testTargetAccount.getId())).thenReturn(testTargetAccount);
+        when(accountService.update(any())).then(invocation -> invocation.getArgument(0));
 
-        manageFundsService.transfer(fromAccountId, toAccountId, amount, currency);
+        final Account sourceAccountAfterTransfer = manageFundsService.transfer(testSourceAccount.getId(), testTargetAccount.getId(), amountToTransfer, currency);
 
-        final Account fromAccountAfterTransfer = accountService.getById(fromAccountId);
-        final Account toAccountAfterTransfer = accountService.getById(toAccountId);
-
-        assertEquals(fromAccountAfterTransfer.getAmount(), expectedFromAmount);
-        assertEquals(toAccountAfterTransfer.getAmount(), expectedToAmount);
+        assertTrue(sourceAccountAfterTransfer.getAmount().compareTo(expectedSourceAccountAmount) == 0);
+        assertTrue(testTargetAccount.getAmount().compareTo(expectedTargetAccountAmount) == 0);
     }
 
     @DataProvider
     public static Object[][] invalidTransferData() {
         return new Object[][]{
                 {1, 1, BigDecimal.valueOf(100L), RUB},
-                {1, 2, BigDecimal.valueOf(0L), EUR},
+                {1, 2, ZERO, EUR},
                 {1, 2, BigDecimal.valueOf(-1L), USD},
-                {5, 6, BigDecimal.valueOf(250000L), RUB},
+                {null, 5, ONE, EUR},
+                {6, null, TEN, USD},
                 {5, 6, null, EUR},
                 {6, 5, BigDecimal.valueOf(12L), null}
         };

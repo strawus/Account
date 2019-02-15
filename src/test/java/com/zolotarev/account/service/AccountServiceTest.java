@@ -2,44 +2,47 @@ package com.zolotarev.account.service;
 
 
 import com.zolotarev.account.domain.Account;
-import com.zolotarev.account.domain.Currency;
+import com.zolotarev.account.repository.AccountRepository;
 import com.zolotarev.exception.EntityNotFoundException;
-import com.zolotarev.helper.TestDataHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
-import static com.zolotarev.account.domain.Currency.RUB;
-import static org.testng.Assert.*;
+import static com.zolotarev.account.domain.Currency.*;
+import static java.math.BigDecimal.*;
+import static java.util.Arrays.asList;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 /**
- * Test suite for {@link AccountService}
+ * Test class for {@link AccountService}
  */
-@SpringBootTest
+@SpringBootTest(classes = AccountService.class)
+@TestExecutionListeners(MockitoTestExecutionListener.class)
 public class AccountServiceTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private AccountService accountService;
-    @Autowired
-    private TestDataHelper testDataHelper;
-
-    @BeforeClass
-    public void setUp() {
-        testDataHelper.prepareDatabaseData();
-    }
+    private AccountService service;
+    @MockBean
+    private AccountRepository repository;
 
     @DataProvider
     public static Object[][] createAccountData() {
         return new Object[][]{
-                {BigDecimal.ZERO, RUB},
-                {BigDecimal.ONE, Currency.USD},
-                {BigDecimal.valueOf(10000L), Currency.EUR}
+                {new Account(ZERO, RUB), new Account(1, ZERO, RUB)},
+                {new Account(ONE, USD), new Account(2, ONE, USD)},
+                {new Account(BigDecimal.valueOf(10000L), EUR), new Account(3, BigDecimal.valueOf(10000L), EUR)}
         };
     }
 
@@ -47,21 +50,19 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
      * Checking that account created by prepared data
      */
     @Test(dataProvider = "createAccountData")
-    public void createAccountTest(BigDecimal amount, Currency currency) {
-        final Account account = accountService.create(new Account(amount, currency));
+    public void createAccountTest(final Account testAccount, final Account expectedAccount) {
+        when(repository.save(testAccount)).thenReturn(expectedAccount);
+        final Account savedAccount = service.create(testAccount);
 
-        assertNotNull(account);
-        assertNotNull(account.getId());
-        assertEquals(account.getCurrency(), currency);
-        assertTrue(account.getAmount().compareTo(amount) == 0);
+        assertEquals(savedAccount, expectedAccount);
     }
 
     @DataProvider
     public static Object[][] updateAccountData() {
         return new Object[][]{
-                {new Account(10, BigDecimal.valueOf(100L), RUB)},
-                {new Account(11, BigDecimal.ZERO, Currency.USD)},
-                {new Account(12, BigDecimal.valueOf(10000L), Currency.EUR)}
+                {new Account(4, BigDecimal.valueOf(100L), RUB)},
+                {new Account(5, ZERO, USD)},
+                {new Account(6, BigDecimal.valueOf(10000L), EUR)}
         };
     }
 
@@ -69,20 +70,20 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
      * Checking that account updated by prepared data
      */
     @Test(dataProvider = "updateAccountData")
-    public void updateAccountTest(Account account) {
-        final Account updatedAccount = accountService.update(account);
+    public void updateAccountTest(Account testAccount) {
+        when(repository.save(testAccount)).thenReturn(testAccount);
 
-        assertNotNull(updatedAccount);
-        assertEquals(updatedAccount.getCurrency(), account.getCurrency());
-        assertTrue(updatedAccount.getAmount().compareTo(account.getAmount()) == 0);
+        final Account updatedAccount = service.update(testAccount);
+
+        assertEquals(updatedAccount, testAccount);
     }
 
     @DataProvider
     public static Object[][] getAccountData() {
         return new Object[][]{
-                {2},
-                {1},
-                {3}
+                {7, new Account(7, ZERO, RUB)},
+                {8, new Account(8, ONE, EUR)},
+                {9, new Account(9, TEN, USD)}
         };
     }
 
@@ -90,11 +91,12 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
      * Checking that getting account by id does works
      */
     @Test(dataProvider = "getAccountData")
-    public void getAccountTest(Integer accountId) {
-        final Account account = accountService.getById(accountId);
+    public void getAccountTest(Integer accountId, Account expectedAccount) {
+        when(repository.findById(accountId)).thenReturn(Optional.of(expectedAccount));
 
-        assertNotNull(account);
-        assertEquals(account.getId(), accountId);
+        final Account account = service.getById(accountId);
+
+        assertEquals(account, expectedAccount);
     }
 
     @DataProvider
@@ -111,8 +113,11 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
      */
     @Test(dataProvider = "deleteAccountData", expectedExceptions = EntityNotFoundException.class)
     public void deleteAccountTest(Integer accountId) {
-        accountService.delete(accountId);
-        accountService.getById(accountId);
+        doNothing().when(repository).deleteById(accountId);
+        when(repository.findById(accountId)).thenReturn(Optional.empty());
+
+        service.delete(accountId);
+        service.getById(accountId);
     }
 
     /**
@@ -120,7 +125,9 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
      */
     @Test
     public void getAllAccountsTest() {
-        List<Account> accounts = accountService.getAll();
+        when(repository.findAll()).thenReturn(asList(new Account(RUB)));
+
+        List<Account> accounts = service.getAll();
         assertFalse(accounts.isEmpty());
     }
 }

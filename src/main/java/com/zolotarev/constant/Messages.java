@@ -6,6 +6,7 @@ package com.zolotarev.constant;
  */
 public final class Messages {
     public static final String ACCOUNT_ID_MUST_BE_NOT_NULL = "account_id_must_be_not_null";
+    public static final String ACCOUNT_ID_MUST_BE_NULL = "account_id_must_be_null";
     public static final String ACCOUNT_MUST_BE_NOT_NULL = "account_must_be_not_null";
     public static final String ACCOUNT_IS_NOT_EXISTS = "account_is_not_exists";
     public static final String ACCOUNT_ALREADY_EXIST = "account_already_exist";
@@ -15,6 +16,7 @@ public final class Messages {
     public static final String AMOUNT_MUST_BE_NOT_NULL = "amount_must_be_not_null";
     public static final String CURRENCY_CODE_MUST_BE_NOT_NULL = "currency_code_must_be_not_null";
     public static final String CURRENCY_MUST_BE_NOT_NULL = "currency_must_be_not_null";
+    public static final String CURRENCIES_MUST_NOT_MATCH = "currencies_must_not_match";
     public static final String SOURCE_CURRENCY_MUST_BE_NOT_NULL = "source_currency_must_be_not_null";
     public static final String SOURCE_ACCOUNT_ID_MUST_BE_NOT_NULL = "source_account_id_must_be_not_null";
     public static final String TARGET_CURRENCY_MUST_BE_NOT_NULL = "target_currency_must_be_not_null";
@@ -27,4 +29,6 @@ public final class Messages {
     public static final String UNABLE_TO_TRANSFER_TO_THE_SAME_ACCOUNT = "unable_to_transfer_to_the_same_account";
     public static final String UNKNOWN_CURRENCY_CODE = "unknown_currency_code";
     public static final String UNKNOWN_CURRENCY_PAIR = "unknown_currency_pair";
+    public static final String VERSION_MUST_BE_NULL = "version_must_be_null";
+    public static final String VERSION_MUST_BE_NOT_NULL = "version_must_be_not_null";
 }

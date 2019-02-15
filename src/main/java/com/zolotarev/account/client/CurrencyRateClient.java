@@ -38,6 +38,7 @@ public class CurrencyRateClient {
     public Mono<BigDecimal> getRate(Currency first, Currency second) {
         Contract.requiresNotNull(first, CURRENCY_MUST_BE_NOT_NULL);
         Contract.requiresNotNull(second, CURRENCY_MUST_BE_NOT_NULL);
+        Contract.requiresNotEquals(first, second, CURRENCIES_MUST_NOT_MATCH);
 
         final String pair = buildCurrencyPairPath(first, second);
 

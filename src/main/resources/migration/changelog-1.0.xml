@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="init_schema" author="strawus">
+        <sql>
+            CREATE SEQUENCE IF NOT EXISTS account_id_seq INCREMENT BY 10 START WITH 1;
+
+            CREATE TABLE IF NOT EXISTS account (
+                id INT PRIMARY KEY,
+                amount_in_minor_currency BIGINT NOT NULL,
+                currency_code TEXT NOT NULL,
+                version INT NOT NULL
+            );
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

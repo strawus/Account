@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <property name="LOG_HOME" value="log"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </layout>
+    </appender>
+
+    <springProfile name="prod">
+        <appender name="FILE-AUDIT"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_HOME}/debug.log</file>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>
+                    %d{yyyy-MM-dd HH:mm:ss} - %msg%n
+                </Pattern>
+            </encoder>
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily -->
+                <fileNamePattern>${LOG_HOME}/archived/debug.%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+
+        </appender>
+
+        <appender name="FILE-ERROR"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_HOME}/error.log</file>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>
+                    %d{yyyy-MM-dd HH:mm:ss} - %msg%n
+                </Pattern>
+            </encoder>
+            <filter class="ch.qos.logback.classic.filter.LevelFilter">
+                <level>ERROR</level>
+                <onMatch>ACCEPT</onMatch>
+                <onMismatch>DENY</onMismatch>
+            </filter>
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily -->
+                <fileNamePattern>${LOG_HOME}/archived/error.%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="FILE-AUDIT"/>
+            <appender-ref ref="FILE-ERROR"/>
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+
+        <logger name="com.zolotarev.account" level="DEBUG"/>
+        <logger name="org.hibernate.sql" level="DEBUG"/>
+        <logger name="org.hibernate.stat" level="DEBUG"/>
+        <logger name="org.hibernate.cache" level="INFO"/>
+        <logger name="org.hibernate.jdbc" level="DEBUG"/>
+        <logger name="org.hibernate.pretty" level="DEBUG"/>
+        <logger name="org.hibernate.hql" level="DEBUG"/>
+        <logger name="org.hibernate.hql.internal.ast" level="INFO"/>
+        <logger name="org.hibernate.tool.hbm2ddl" level="WARN"/>
+        <logger name="org.springframework.web" level="DEBUG"/>
+        <logger name="org.springframework.orm" level="DEBUG"/>
+        <logger name="org.springframework.orm.jpa" level="DEBUG"/>
+        <logger name="org.springframework.transaction" level="DEBUG"/>
+        <logger name="org.springframework.aop" level="DEBUG"/>
+        <logger name="org.springframework.cache" level="TRACE"/>
+        <logger name="org.ehcache" level="DEBUG"/>
+        <logger name="net.ttddyy.dsproxy.listener.logging.SLF4JQueryLoggingListener" level="DEBUG" />
+        <logger name="org.hibernate.type.descriptor.sql" level="INFO"/> <!--INFO, because SLF4JQueryLoggingListener uses instead this logger-->
+    </springProfile>
+
+</configuration>
