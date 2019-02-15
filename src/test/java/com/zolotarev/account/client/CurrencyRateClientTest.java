@@ -1,8 +1,12 @@
 package com.zolotarev.account.client;
 
+import com.zolotarev.account.controller.AdviceController;
 import com.zolotarev.account.domain.Currency;
 import com.zolotarev.exception.RequestException;
+import com.zolotarev.mock.controller.CurrencyRateControllerMock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -18,10 +22,11 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 /**
- * Test suite for {@link CurrencyRateClient}
+ * Test class for {@link CurrencyRateClient}
  */
-@ActiveProfiles("dev")
-@SpringBootTest(webEnvironment = DEFINED_PORT)
+@ActiveProfiles("dev,mockCurrencyRate")
+@EnableAutoConfiguration(exclude = DataSourceAutoConfiguration.class)
+@SpringBootTest(webEnvironment = DEFINED_PORT, classes = {CurrencyRateClient.class, CurrencyRateControllerMock.class, AdviceController.class})
 public class CurrencyRateClientTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
@@ -65,4 +70,5 @@ public class CurrencyRateClientTest extends AbstractTestNGSpringContextTests {
     public void sendInvalidRequestTest(Currency first, Currency second) {
         client.getRate(first, second).block();
     }
+
 }

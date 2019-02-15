@@ -14,9 +14,9 @@ import java.util.Set;
 import static org.testng.Assert.assertEquals;
 
 /**
- * Base class for validation testing
+ * Base class for validation with groups testing
  */
-public abstract class AbstractValidationTest {
+public abstract class AbstractValidationWithGroupsTest {
 
     private Validator validator;
     private ValidatorFactory validatorFactory;
@@ -33,12 +33,12 @@ public abstract class AbstractValidationTest {
     }
 
     /**
-     * Test calls, if inheritor contains {@link org.testng.annotations.DataProvider} with name 'dtos',
-     * which provides: dto for testing and expected validation result
+     * Test calls, if inheritor contains {@link DataProvider} with name 'dtosWithGroups',
+     * which provides: dtos for testing, expected validation result and validation groups array
      */
-    @Test(dataProvider = "dtos")
-    public void validationTest(Object dto, boolean isValid) {
-        final Set<ConstraintViolation<Object>> constraintViolations = validator.validate(dto);
+    @Test(dataProvider = "dtosWithGroups")
+    public void validationWithGroupsTest(Object dto, boolean isValid, Class<?>... groups) {
+        final Set<ConstraintViolation<Object>> constraintViolations = validator.validate(dto, groups);
         assertEquals(constraintViolations.isEmpty(), isValid);
     }
 }

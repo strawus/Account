@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import static com.zolotarev.account.domain.Currency.RUB;
 
 /**
- * Test suite for {@link TransferDto} validation
+ * Test class for {@link TransferDto} validation
  */
 public class TransferDtoValidationTest extends AbstractValidationTest {
 
