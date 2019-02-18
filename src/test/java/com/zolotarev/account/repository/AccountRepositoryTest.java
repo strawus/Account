@@ -25,11 +25,11 @@ import static org.testng.Assert.*;
 /**
  * Test class for {@link AccountRepository}
  */
-@DataJpaTest(properties = "spring.jpa.properties.hibernate.cache.use_second_level_cache=false")
 @ActiveProfiles("dev,embeddedPostgres")
 @AutoConfigureTestDatabase(replace = NONE)
 @EntityScan("com.zolotarev.account.domain")
 @ContextConfiguration(classes = AccountConfiguration.class)
+@DataJpaTest(properties = "spring.jpa.properties.hibernate.cache.use_second_level_cache=false")
 public class AccountRepositoryTest extends AbstractTestNGSpringContextTests {
 
     @Autowired

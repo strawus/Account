@@ -2,9 +2,9 @@ package com.zolotarev.account.domain;
 
 import com.zolotarev.util.Contract;
 import lombok.*;
+import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Cache;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -15,7 +15,7 @@ import static com.zolotarev.constant.Messages.*;
 import static java.math.BigDecimal.ZERO;
 import static javax.persistence.EnumType.STRING;
 import static javax.persistence.GenerationType.SEQUENCE;
-import static lombok.AccessLevel.PRIVATE;
+import static lombok.AccessLevel.PROTECTED;
 import static org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE;
 
 /**
@@ -26,10 +26,10 @@ import static org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE;
 @ToString
 @DynamicInsert
 @DynamicUpdate
-@NoArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PROTECTED)
 @Cache(usage = READ_WRITE, region = "accounts")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public final class Account implements Serializable {
+public class Account implements Serializable {
 
     //Unique account identificator. If this account didn't stored yet, it can't be used in HashSet/HashMap, because id haven't generated
     @Id

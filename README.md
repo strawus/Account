@@ -9,18 +9,23 @@ To store accounts used embedded PostgreSQL
 - Hibernate
 - Hibernate Validator
 - Reactor
+- Liquibase
+- Maven
 - Lombok
 - MapStruct
 - EhCache
 - Swagger
 - Logback
-- otj-pg-embedded (as Embedded PostgreSQL)
+- Jackson
+- TestNG
+- otj-pg-embedded (aka Embedded PostgreSQL)
 
 ### How to run
 ```sh
 mvn exec:java
 ```
 
+### API
 Application starts a embedded tomcat server on localhost:8080 
 
 API documentation available by address: *http://localhost:8080/swagger-ui.html*
